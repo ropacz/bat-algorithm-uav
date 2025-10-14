@@ -11,10 +11,13 @@
 *_sm.h
 
 # Build directories
+out/
 src/out/
 src/.qtenvrc
 src/Makefile
 src/.last-copts
+src/bat-algorithm
+src/bat-algorithm_dbg
 
 # Results and output
 simulations/results/
@@ -23,6 +26,7 @@ simulations/results/
 *.vci
 *.elog
 *.log
+simulations/test.ini
 
 # IDE files
 .project
@@ -30,6 +34,14 @@ simulations/results/
 .settings/
 .oppbuildspec
 *.launch
+.launches/
+
+# Backup and temporary files
+*.backup
+*.bak
+*.tmp
+*~
+*.corrupted
 
 # Python
 __pycache__/
@@ -47,6 +59,11 @@ build/
 .DS_Store
 .AppleDouble
 .LSOverride
+._*
+
+# Documentation builds
+docs/_build/
+*.pdf
 
 # Linux
 *~

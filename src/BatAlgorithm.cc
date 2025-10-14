@@ -122,9 +122,12 @@ void BatAlgorithm::handleMessage(cMessage *msg)
         // Get global best position (from other bats)
         Coord globalBest = getGlobalBest();
         
+        // Log state for debugging/visualization
         EV_INFO << "BAT[" << getParentModule()->getIndex() << "] t=" << simTime() 
                 << " pos=(" << (int)currentPosition.x << "," << (int)currentPosition.y << "," << (int)currentPosition.z << ")"
-                << " fitness=" << (int)fitness << " loud=" << currentLoudness << endl;
+                << " fitness=" << (int)fitness 
+                << " loudness=" << currentLoudness 
+                << " pulseRate=" << currentPulseRate << endl;
         
         // ============================================================
         // PHASE 2: VELOCITY UPDATE (Bat Algorithm Equation)
