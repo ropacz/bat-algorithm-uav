@@ -57,4 +57,7 @@ simple BatAlgorithm
         @statistic[pulseRate](title="Current Pulse Rate"; record=vector,stats; interpolationmode=sample-hold);
         @signal[positionBroadcast](type=simtime_t);
         @statistic[positionBroadcast](title="Position Broadcasts"; record=count);
+        
+    gates:
+        input in @directIn;  // For receiving position updates from other UAVs
 }

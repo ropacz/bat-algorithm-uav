@@ -246,6 +246,12 @@ void BatAlgorithm::handleMessage(cMessage *msg)
         // Schedule next update
         scheduleAt(simTime() + updateInterval, updateTimer);
     }
+    else if (msg->isSelfMessage() == false) {
+        // Handle position broadcast message from other UAVs
+        EV_INFO << "BAT[" << getParentModule()->getIndex() << "] Received position update from BAT[" 
+                << msg->getSenderModule()->getParentModule()->getIndex() << "]" << endl;
+        delete msg;
+    }
 }
 
 void BatAlgorithm::updateVelocity()
@@ -341,13 +347,36 @@ Coord BatAlgorithm::getGlobalBest()
 
 void BatAlgorithm::broadcastPosition()
 {
-    // Emit signal for communication visualization
+    // Emit signal for statistics
     emit(registerSignal("positionBroadcast"), simTime());
     
-    // Log broadcast for visibility in simulator
-    EV << "BAT[" << getParentModule()->getIndex() << "] Broadcasting: "
-       << "pos=(" << (int)currentPosition.x << "," << (int)currentPosition.y << ","  << (int)currentPosition.z << ") "
-       << "fitness=" << (int)fitness << endl;
+    // Send actual messages to other UAVs for visualization in packet traffic
+    cModule *network = getParentModule()->getParentModule();
+    if (!network) return;
+    
+    for (int i = 0; i < network->getSubmoduleVectorSize("uav"); i++) {
+        cModule *uav = network->getSubmodule("uav", i);
+        if (uav && uav != getParentModule()) {
+            BatAlgorithm *otherBat = check_and_cast<BatAlgorithm*>(
+                uav->getSubmodule("batAlgorithm"));
+            if (otherBat) {
+                // Create position update message
+                cMessage *msg = new cMessage("posUpdate");
+                msg->addPar("fitness") = fitness;
+                msg->addPar("x") = currentPosition.x;
+                msg->addPar("y") = currentPosition.y;
+                msg->addPar("z") = currentPosition.z;
+                msg->addPar("loudness") = currentLoudness;
+                msg->addPar("pulseRate") = currentPulseRate;
+                
+                // Send message directly to other bat
+                sendDirect(msg, otherBat, "in");
+                
+                EV_DETAIL << "BAT[" << getParentModule()->getIndex() << "] → BAT[" << i 
+                          << "] position update sent" << endl;
+            }
+        }
+    }
 }
 
 void BatAlgorithm::finish()
@@ -444,8 +473,10 @@ double BatAlgorithm::calculateUAVProximityPenalty(const Coord& position)
             if (otherBat) {
                 double dist = position.distance(otherBat->getPosition());
                 if (dist < uavSafetyDistance) {
-                    // Penalty increases as drones get closer
-                    penalty += (uavSafetyDistance - dist) * 50.0;
+                    // Strong penalty increases as drones get closer
+                    // Using exponential penalty for more aggressive separation
+                    double normalizedDist = dist / uavSafetyDistance;
+                    penalty += (uavSafetyDistance - dist) * 150.0 * (1.0 - normalizedDist);
                 }
             }
         }

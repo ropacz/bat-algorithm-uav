@@ -134,7 +134,7 @@ r_i(t+1) = r_i(0) × [1 - exp(-γ × t)]
 
 # Collision Avoidance
 *.uav[*].batAlgorithm.safetyDistance = 20m       # Obstacle margin
-*.uav[*].batAlgorithm.uavSafetyDistance = 30m    # Inter-drone distance
+*.uav[*].batAlgorithm.uavSafetyDistance = 50m    # Inter-drone distance (increased spacing)
 *.uav[*].batAlgorithm.obstacleWeight = 3.0       # Penalty multiplier
 ```
 
