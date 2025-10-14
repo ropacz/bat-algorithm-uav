@@ -1,0 +1,74 @@
+# OMNeT++ / INET Build artifacts
+*.o
+*.so
+*.dylib
+*.dll
+*.a
+*.exe
+*_m.cc
+*_m.h
+*_sm.cc
+*_sm.h
+
+# Build directories
+src/out/
+src/.qtenvrc
+src/Makefile
+src/.last-copts
+
+# Results and output
+simulations/results/
+*.vec
+*.sca
+*.vci
+*.elog
+*.log
+
+# IDE files
+.project
+.cproject
+.settings/
+.oppbuildspec
+*.launch
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# Documentation builds
+doc/html/
+doc/latex/
+
+# Analysis output
+simulations/results/analysis/*.png
+simulations/results/analysis/*.pdf

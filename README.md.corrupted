@@ -1,0 +1,529 @@
+# 🦇 Bat Algorithm para UAVs - Desvio de Obstáculos# Bat Algorithm para UAV Swarm no OMNeT++
+
+
+
+Simulação de enxame de UAVs usando o Bat Algorithm (Algoritmo do Morcego) para navegação com desvio de obstáculos estáticos em OMNeT++ e INET Framework.Simulação de enxame de drones (UAVs) usando o Bat Algorithm (algoritmo bio-inspirado) no OMNeT++ com INET Framework.
+
+
+
+## 📋 Visão Geral> **⚠️ IMPORTANTE**: Para compilar e executar o projeto corretamente, use o ambiente `opp_env`:
+
+> ```bash
+
+Este projeto implementa o **Bat Algorithm** (Yang, 2010) para controlar um enxame de UAVs (drones) que devem:> opp_env shell omnetpp-6.2.0 inet-4.5.4
+
+- ✈️ Navegar de uma posição inicial até um alvo> ```
+
+- 🛑 Desviar de obstáculos estáticos durante o percurso> Isso configura todas as variáveis de ambiente necessárias (OMNeT++, INET, paths, etc.)
+
+- 🔄 Convergir de forma cooperativa usando inteligência de enxame
+
+## 📋 Descrição
+
+### Características Principais
+
+Este projeto implementa o **Bat Algorithm** (Yang, 2010) para controlar um enxame de UAVs que convergem para um ponto alvo. O algoritmo simula o comportamento de ecolocalização dos morcegos.
+
+- **Física Realista**: Movimento suave baseado em velocidade com integração temporal
+
+- **Desvio de Obstáculos**: Detecção e desvio com distância de segurança configurável### Componentes
+
+- **Algoritmo Bat Puro**: Implementação fiel com frequência, loudness e pulse rate
+
+- **Múltiplos Cenários**: Configurações de teste de simples a complexas- **ArbitraryMobility**: Mobilidade 3D realista para drones
+
+- **BatAlgorithm**: Implementação do algoritmo Bat com:
+
+## 🚀 Início Rápido  - Frequência ajustável para exploração
+
+  - Loudness (volume) decrescente para convergência
+
+### Pré-requisitos  - Pulse rate crescente para refinamento
+
+  - Busca local adaptativa
+
+- **OMNeT++ 6.2.0** (instalado em `/Users/rodrigo/omnetpp-workspace/omnetpp-6.2.0`)- **UAV**: Módulo composto (mobilidade + algoritmo)
+
+- **INET Framework 4.5.4** (instalado em `/Users/rodrigo/omnetpp-workspace/inet-4.5.4`)- **BatSwarmNetworkSimple**: Rede com múltiplos UAVs
+
+- **Python 3.10+** (para análise de resultados)
+
+- **Bibliotecas Python**: `numpy`, `pandas`, `matplotlib`## 🚀 Quick Start
+
+
+
+### Instalação### 1. Compilar
+
+
+
+```bash**Método Recomendado (usando opp_env):**
+
+# 1. Clone ou navegue até o diretório do projeto```bash
+
+cd /Users/rodrigo/omnetpp-workspace/bat-algorithmopp_env shell omnetpp-6.2.0 inet-4.5.4
+
+cd ~/omnetpp-workspace/bat-algorithm
+
+# 2. Compile o projetomake
+
+./make.sh```
+
+
+
+# 3. Execute uma simulação (linha de comando)**Método Alternativo (script):**
+
+./run_sim.sh```bash
+
+./make.sh
+
+# 4. Ou abra a interface gráfica (requer Qt6)```
+
+./run_qtenv_fixed.sh
+
+```### 2. Executar Simulação
+
+
+
+### Executar Simulação Específica```bash
+
+# Terminal (recomendado)
+
+```bash./run_sim.sh
+
+# Simular com obstáculos simples (configuração padrão)
+
+cd simulations# Interface gráfica (Qtenv)
+
+../src/bat-algorithm_dbg -u Cmdenv -c SimpleObstacles./run_qtenv_fixed.sh
+
+
+
+# Simular com muitos obstáculos# OMNeT++ IDE - veja seção abaixo
+
+../src/bat-algorithm_dbg -u Cmdenv -c ManyObstacles```
+
+
+
+# Simular UAVs rápidos com resposta reativa### 3. Analisar Resultados
+
+../src/bat-algorithm_dbg -u Cmdenv -c FastAvoidance
+
+``````bash
+
+python analyze_results.py simulations/results
+
+## 📊 Análise de Resultadosopen simulations/results/analysis/*.png
+
+```
+
+Após executar uma simulação, analise os resultados:
+
+## 📁 Estrutura do Projeto
+
+```bash
+
+# Instalar dependências Python (primeira vez)```
+
+pip install numpy pandas matplotlibbat-algorithm/
+
+├── src/
+
+# Executar análise│   ├── ArbitraryMobility.{h,cc,ned}  # Mobilidade 3D
+
+python3 analyze_results.py│   ├── BatAlgorithm.{h,cc,ned}       # Algoritmo Bat
+
+```│   ├── UAV.ned                        # Módulo UAV
+
+│   └── package.ned
+
+Isso irá gerar:├── simulations/
+
+- 📈 **Gráficos de convergência de fitness** por configuração│   ├── BatSwarmNetworkSimple.ned     # Rede (sem visualizador)
+
+- 🛑 **Estatísticas de obstáculos evitados** por UAV│   ├── omnetpp.ini                   # Configurações
+
+- 📋 **Resumo de estatísticas** no terminal│   └── results/                      # Resultados das simulações
+
+- 💾 **Imagens PNG** salvas em `simulations/results/analysis/`├── make.sh                           # Script de compilação
+
+├── run_sim.sh                        # Executar (terminal)
+
+## ⚙️ Configurações Disponíveis├── run_qtenv_fixed.sh                # Executar (GUI)
+
+├── analyze_results.py                # Análise de resultados
+
+| Configuração | UAVs | Obstáculos | Descrição |├── README.md                         # Documentação principal
+
+|-------------|------|------------|-----------|├── BAT_ALGORITHM.md                  # Teoria do algoritmo
+
+| `General` | 10 | 0 | Básica sem obstáculos |└── CONFIGURAR_IDE.md                 # Instruções do IDE
+
+| `QuickTest` | 5 | 0 | Teste rápido (60s) |```
+
+| `SimpleObstacles` | 10 | 5 | Obstáculos simples ⭐ **Recomendado** |
+
+| `ManyObstacles` | 15 | 10 | Campo denso de obstáculos |## ⚙️ Configurações Disponíveis
+
+| `FastAvoidance` | 12 | 8 | UAVs rápidos com resposta reativa |
+
+| `ObstacleCourse` | 20 | 15 | Curso desafio com obstáculos grandes |Edite `simulations/omnetpp.ini` para ajustar:
+
+
+
+## 🏗️ Arquitetura do Projeto| Configuração | UAVs | Tempo | Descrição |
+
+|--------------|------|-------|-----------|
+
+```| **QuickTest** | 5 | 60s | Teste rápido |
+
+bat-algorithm/| **SmallSwarm** | 10 | 300s | Enxame pequeno |
+
+├── src/                          # Código-fonte C++| **MediumSwarm** | 20 | 300s | Enxame médio |
+
+│   ├── BatAlgorithm.{h,cc,ned}  # Implementação do Bat Algorithm| **LargeSwarm** | 30 | 300s | Enxame grande |
+
+│   ├── ArbitraryMobility.{h,cc,ned}  # Modelo de mobilidade 3D| **FastConvergence** | 15 | 200s | Convergência rápida |
+
+│   ├── Obstacle.{h,cc,ned}      # Módulo de obstáculos| **SlowConvergence** | 15 | 400s | Exploração lenta |
+
+│   └── UAV.ned                   # Definição do drone (módulo composto)
+
+├── simulations/                  # Configurações de simulação## 🎛️ Parâmetros do Bat Algorithm
+
+│   ├── BatSwarmNetworkSimple.ned        # Rede básica
+
+│   ├── BatSwarmNetworkWithObstacles.ned # Rede com obstáculos```ini
+
+│   ├── omnetpp.ini              # Parâmetros de configuração# Frequência (exploração do espaço)
+
+│   └── results/                  # Resultados das simulações*.uav[*].batFrequencyMin = 0.0
+
+├── analyze_results.py            # Script de análise Python*.uav[*].batFrequencyMax = 2.0
+
+├── make.sh                       # Script de compilação
+
+├── run_sim.sh                    # Executa simulação CLI# Loudness (convergência)
+
+└── run_qtenv_fixed.sh            # Abre GUI do simulador*.uav[*].batLoudness = 0.9        # Inicial: alto = exploração
+
+```*.uav[*].batAlpha = 0.9           # Redução: 0.85-0.95
+
+
+
+## 🧮 Algoritmo Bat# Pulse Rate (refinamento)
+
+*.uav[*].batPulseRate = 0.5       # Inicial
+
+### Conceitos Principais*.uav[*].batGamma = 0.9           # Crescimento: 0.85-0.95
+
+
+
+O Bat Algorithm simula o comportamento de ecolocação dos morcegos:# Atualização
+
+*.uav[*].batUpdateInterval = 1s
+
+1. **Frequência (f)**: Controla o tamanho dos passos em direção ao alvo
+
+   - Maior frequência = passos maiores (exploração)# Alvo
+
+   - Menor frequência = passos menores (explotação)*.targetX = 1000m
+
+*.targetY = 1000m
+
+2. **Loudness (A)**: Intensidade do som (decresce ao se aproximar do alvo)*.targetZ = 150m
+
+   - Alta loudness = mais exploração```
+
+   - Baixa loudness = mais explotação
+
+## 📊 Métricas Coletadas
+
+3. **Pulse Rate (r)**: Taxa de emissão de pulsos (aumenta perto do alvo)
+
+   - Baixa taxa = exploração global- **Fitness**: Distância de cada UAV ao alvo (menor = melhor)
+
+   - Alta taxa = busca local intensiva- **Loudness**: Volume de ecolocalização
+
+- **Pulse Rate**: Taxa de emissão de pulsos
+
+### Equações Implementadas
+
+Resultados salvos em:
+
+```cpp- `simulations/results/*.vec` - Dados vetoriais (série temporal)
+
+// Atualização de velocidade- `simulations/results/*.sca` - Dados escalares (estatísticas)
+
+velocity = velocity * inertia + (globalBest - currentPosition) * frequency
+
+## 🖥️ Usando o IDE do OMNeT++
+
+// Atualização de posição (integração temporal)
+
+newPosition = currentPosition + velocity * updateInterval### ⚠️ IMPORTANTE: Build no IDE
+
+
+
+// Fitness (minimizar distância + penalidade de obstáculos)Se o build falhar no IDE com erro "inet/mobility/base/MovingMobilityBase.h not found":
+
+fitness = distance_to_target + obstacle_penalty * obstacleWeight
+
+```1. **Abra o IDE via opp_env**:
+
+   ```bash
+
+## 🛑 Sistema de Desvio de Obstáculos   opp_env shell omnetpp-6.2.0 inet-4.5.4
+
+   omnetpp
+
+### Detecção   ```
+
+
+
+- **Alcance de Detecção**: UAV detecta obstáculos dentro de um raio configurável (default: 60m)2. **Configure as dependências**:
+
+- **Distância de Segurança**: Distância mínima segura dos obstáculos (default: 20m)   - Clique direito no projeto → **Properties**
+
+   - **Project References** → ✅ Marque **inet-4.5.4**
+
+### Penalidade   - **Apply and Close**
+
+
+
+Quando um UAV se aproxima de um obstáculo:3. **Limpe e recompile**:
+
+   - **Project → Clean**
+
+```cpp   - **Project → Build Project**
+
+// Cálculo exponencial de penalidade
+
+distance_to_obstacle = obstacle.getDistanceToEdge(position)📖 **Para configuração detalhada, veja**: `CONFIGURAR_IDE.md`
+
+if (distance_to_obstacle < safetyDistance) {
+
+    penalty += exp(-(distance_to_obstacle / safetyDistance)) * 100## 🖥️ Usando o IDE do OMNeT++
+
+}
+
+```### Abrir o IDE
+
+
+
+A penalidade cresce exponencialmente conforme o UAV se aproxima, forçando-o a desviar.```bash
+
+opp_env shell omnetpp-6.2.0 inet-4.5.4
+
+## 🎛️ Parâmetros Principaisomnetpp
+
+```
+
+### Bat Algorithm (`*.uav[*].batAlgorithm.*`)
+
+### Configurar Projeto
+
+| Parâmetro | Valor Padrão | Descrição |
+
+|-----------|--------------|-----------|1. **Importar**: **File → Open Projects from File System** → Selecione o projeto
+
+| `frequencyMin` | 0.0 | Frequência mínima |2. **Dependências**: Clique direito → **Properties** → **Project References** → ✅ **inet-4.5.4**
+
+| `frequencyMax` | 2.0 | Frequência máxima |3. **Build**: **Project → Clean** → **Project → Build Project**
+
+| `loudness` | 0.9 | Loudness inicial |
+
+| `pulseRate` | 0.5 | Taxa de pulso inicial |### Executar
+
+| `alpha` | 0.9 | Fator de redução de loudness |
+
+| `gamma` | 0.9 | Fator de aumento de pulse rate |1. Clique direito em `simulations/omnetpp.ini`
+
+| `updateInterval` | 1s | Intervalo de atualização do algoritmo |2. **Run As → OMNeT++ Simulation** → Escolha **QuickTest**
+
+
+
+### Obstáculos (`*.uav[*].batAlgorithm.*`)📖 **Troubleshooting do IDE**: Veja `CONFIGURAR_IDE.md`
+
+
+
+| Parâmetro | Valor Padrão | Descrição |### Analisar no IDE
+
+|-----------|--------------|-----------|
+
+| `safetyDistance` | 20m | Distância mínima segura |1. **Window → Show View → Analysis**
+
+| `detectionRange` | 60m | Alcance de detecção |2. **Browse Data** → selecione arquivos em `results/`
+
+| `obstacleWeight` | 3.0 | Peso da penalidade de obstáculos |3. Clique direito → **Plot**
+
+
+
+### Mobilidade (`*.uav[*].mobility.*`)## 🐛 Troubleshooting
+
+
+
+| Parâmetro | Valor Padrão | Descrição |### Build Error: "cannot be used outside an opp_env shell"
+
+|-----------|--------------|-----------|
+
+| `minSpeed` | 15 mps | Velocidade mínima (54 km/h) |**Solução**: Use `./make.sh` ou compile dentro do `opp_env`:
+
+| `maxSpeed` | 25 mps | Velocidade máxima (90 km/h) |
+
+| `updateInterval` | 0.1s | Intervalo de atualização de posição |```bash
+
+opp_env shell omnetpp-6.2.0 inet-4.5.4
+
+## 📖 Documentação Adicionalcd ~/omnetpp-workspace/bat-algorithm
+
+make
+
+- **[BAT_ALGORITHM.md](BAT_ALGORITHM.md)**: Detalhes técnicos do algoritmo```
+
+- **[CONFIGURAR_IDE.md](CONFIGURAR_IDE.md)**: Guia de configuração do IDE
+
+### Qtenv: Ícones Invisíveis (macOS)
+
+## 🐛 Solução de Problemas
+
+**Problema**: Qt6 no macOS tem problemas de renderização de ícones
+
+### Erro: "cannot find -lINET"
+
+**Soluções**:
+
+```bash1. Use atalhos: `F5` (Run), `F6` (Fast), `F8` (Stop)
+
+# Certifique-se que o INET está compilado2. Mude tema: Dark ↔ Light
+
+cd /Users/rodrigo/omnetpp-workspace/inet-4.5.43. Use terminal: `./run_sim.sh`
+
+make -j$(nproc)
+
+### IDE: Erro "inet/mobility/.../h not found"
+
+# Recompile o projeto
+
+cd /Users/rodrigo/omnetpp-workspace/bat-algorithmVeja `CONFIGURAR_IDE.md` para instruções completas de configuração do IDE.
+
+./make.sh
+
+``````bash
+
+make cleanall
+
+### Erro: "file not found: inet/..."make makefiles
+
+./make.sh
+
+```bash```
+
+# Regenere o Makefile com caminhos corretos
+
+cd src## 📚 Documentação Adicional
+
+opp_makemake -f --deep -O out -I. -I../simulations \
+
+  -I/Users/rodrigo/omnetpp-workspace/inet-4.5.4/src \- **BAT_ALGORITHM.md**: Teoria do algoritmo, equações, referências
+
+  -L/Users/rodrigo/omnetpp-workspace/inet-4.5.4/src \- **analyze_results.py**: Script de análise (use `--help`)
+
+  -lINET
+
+```## 🎓 Referências
+
+
+
+### Simulação não inicia- Yang, X. S. (2010). "A new metaheuristic bat-inspired algorithm". Nature Inspired Cooperative Strategies for Optimization (NICSO 2010), 65-74.
+
+- OMNeT++ Documentation: https://omnetpp.org
+
+```bash- INET Framework: https://inet.omnetpp.org
+
+# Verifique se o ambiente está configurado
+
+source /Users/rodrigo/omnetpp-workspace/omnetpp-6.2.0/setenv## 📝 Requisitos
+
+
+
+# Execute com mais verbosidade- OMNeT++ 6.x
+
+cd simulations- INET Framework 4.5.x
+
+../src/bat-algorithm_dbg -u Cmdenv -c General -v- Python 3.x (para análise)
+
+```  - numpy
+
+  - matplotlib
+
+## 📚 Referências  - pandas
+
+
+
+- **Yang, X. S.** (2010). "A new metaheuristic bat-inspired algorithm". *Nature Inspired Cooperative Strategies for Optimization (NICSO 2010)*. Springer.## 🔧 Instalação das Dependências Python
+
+- **OMNeT++**: https://omnetpp.org/
+
+- **INET Framework**: https://inet.omnetpp.org/```bash
+
+pip install numpy matplotlib pandas
+
+## 📄 Licença```
+
+
+
+Este projeto é de código aberto e pode ser usado para fins educacionais e de pesquisa.## 📄 Licença
+
+
+
+## 👤 AutorLGPL v3
+
+
+
+Desenvolvido como projeto de simulação de enxame de UAVs usando OMNeT++ e INET Framework.## 👤 Autor
+
+
+
+---Projeto de Simulação de Drones com Bat Algorithm  
+
+Outubro 2025
+
+**Status do Projeto**: ✅ Estável e funcional
+
+---
+
+**Última Atualização**: Outubro 2025
+
+## 🚀 Comandos Rápidos
+
+```bash
+# Entrar no ambiente (SEMPRE FAÇA ISSO PRIMEIRO!)
+opp_env shell omnetpp-6.2.0 inet-4.5.4
+
+# Compilar
+cd ~/omnetpp-workspace/bat-algorithm
+make
+
+# Executar (teste rápido)
+./run_sim.sh
+
+# Analisar
+python analyze_results.py simulations/results
+
+# Visualizar
+open simulations/results/analysis/*.png
+
+# IDE
+omnetpp
+```
+
+## ✅ Status
+
+- ✅ Compilação funcionando
+- ✅ Simulação executando
+- ✅ Resultados sendo gerados
+- ✅ Análise de dados funcionando
+- ✅ Algoritmo Bat implementado
+- ✅ Mobilidade 3D funcionando
+
+**Projeto 100% funcional!** 🎉

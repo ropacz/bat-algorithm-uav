@@ -1,0 +1,97 @@
+#!/bin/bash
+#
+# Script to run Bat Algorithm UAV Swarm Simulation
+#
+
+# Setup OMNeT++ environment
+export OMNETPP_ROOT="/Users/rodrigo/omnetpp-workspace/omnetpp-6.2.0"
+export INET_PROJ="/Users/rodrigo/omnetpp-workspace/inet-4.5.4"
+export OPP_ENV_VERSION="1.0"
+
+# Source OMNeT++ environment if not already done
+if [ -f "$OMNETPP_ROOT/setenv" ]; then
+    source "$OMNETPP_ROOT/setenv" -f > /dev/null 2>&1
+fi
+
+# Default configuration
+CONFIG="General"
+UI="Qtenv"
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -c|--config)
+            CONFIG="$2"
+            shift 2
+            ;;
+        -u|--ui)
+            UI="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  -c, --config <name>   Configuration name (default: General)"
+            echo "                        Available: QuickTest, SmallSwarm, MediumSwarm,"
+            echo "                        LargeSwarm, FastConvergence, SlowConvergence"
+            echo "  -u, --ui <mode>       UI mode: Qtenv or Cmdenv (default: Qtenv)"
+            echo "  -h, --help            Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0                    # Run with default settings"
+            echo "  $0 -c QuickTest       # Run quick test configuration"
+            echo "  $0 -u Cmdenv          # Run in command line mode"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use -h or --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# Find opp_run
+if ! command -v opp_run &> /dev/null; then
+    echo "Error: opp_run not found. Make sure OMNeT++ is installed and in PATH"
+    exit 1
+fi
+
+# Check if INET is available
+if [ -z "$INET_PROJ" ]; then
+    echo "Warning: INET_PROJ not set. Trying default locations..."
+    INET_PROJ="/Users/rodrigo/omnetpp-workspace/inet-4.5.4"
+fi
+
+# Check if binary exists
+BINARY="../out/clang-debug/src/bat-algorithm_dbg"
+if [ ! -f "$BINARY" ]; then
+    echo "Error: Binary not found at $BINARY"
+    echo "Please compile first: cd .. && ./make.sh"
+    exit 1
+fi
+
+echo "=========================================="
+echo "Bat Algorithm UAV Swarm Simulation"
+echo "=========================================="
+echo "Configuration: $CONFIG"
+echo "UI Mode: $UI"
+echo "INET Project: $INET_PROJ"
+echo "Binary: $BINARY"
+echo "=========================================="
+echo ""
+
+# Run simulation directly with the executable
+$BINARY -u $UI -c $CONFIG \
+    -n .:../src:$INET_PROJ/src \
+    --image-path=$INET_PROJ/images \
+    -l $INET_PROJ/src/INET \
+    omnetpp.ini
+
+echo ""
+echo "Simulation completed!"
+
+cd `dirname $0`
+../src/bat_algorithm -n .:../src $*
+# for shared lib, use: opp_run -l ../src/bat_algorithm -n .:../src $*

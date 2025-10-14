@@ -1,0 +1,7 @@
+# User-supplied makefile fragment
+# This file is included by the main Makefile
+
+# macOS fix: remove -fuse-ld=lld (not compatible with macOS clang)
+ifeq ($(shell uname -s),Darwin)
+LDFLAGS := $(filter-out -fuse-ld=lld,$(LDFLAGS))
+endif
