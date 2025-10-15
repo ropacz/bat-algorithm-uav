@@ -46,9 +46,10 @@ void ArbitraryMobility::initialize(int stage)
            << "] Z[" << minAltitude << "," << maxAltitude << "]" << endl;
     }
     else if (stage == INITSTAGE_LAST) {
-        // Schedule first movement update
+        // Start periodic movement updates
         double updateInterval = par("updateInterval");
         scheduleAt(simTime() + updateInterval, moveTimer);
+        EV << "ArbitraryMobility: Movement timer scheduled with interval " << updateInterval << "s" << endl;
     }
 }
 
@@ -81,85 +82,88 @@ void ArbitraryMobility::setInitialPosition()
 void ArbitraryMobility::move()
 {
     simtime_t now = simTime();
+    double elapsedTime = (now - lastUpdate).dbl();
     
-    if (now > lastUpdate) {
-        simtime_t timeDelta = now - lastUpdate;
+    if (elapsedTime > 0) {
+        // Update position based on current velocity
+        Coord newPosition = lastPosition;
+        newPosition.x += lastVelocity.x * elapsedTime;
+        newPosition.y += lastVelocity.y * elapsedTime;
+        newPosition.z += lastVelocity.z * elapsedTime;
         
-        // Update position: new_position = current_position + velocity * time
-        Coord newPosition = lastPosition + lastVelocity * timeDelta.dbl();
-        
-        // Apply boundary constraints with bounce
+        // Check boundaries and reflect if needed
         bool bounced = false;
-        const double MARGIN = 5.0; // Margem maior para evitar oscilação
         
-        if (newPosition.x <= constraintAreaMinX) {
-            newPosition.x = constraintAreaMinX + MARGIN;
-            lastVelocity.x = abs(lastVelocity.x); // Força direção positiva
+        if (newPosition.x < constraintAreaMinX) {
+            newPosition.x = constraintAreaMinX;
+            lastVelocity.x = -lastVelocity.x;
             bounced = true;
-        } else if (newPosition.x >= constraintAreaMaxX) {
-            newPosition.x = constraintAreaMaxX - MARGIN;
-            lastVelocity.x = -abs(lastVelocity.x); // Força direção negativa
+        } else if (newPosition.x > constraintAreaMaxX) {
+            newPosition.x = constraintAreaMaxX;
+            lastVelocity.x = -lastVelocity.x;
             bounced = true;
         }
         
-        if (newPosition.y <= constraintAreaMinY) {
-            newPosition.y = constraintAreaMinY + MARGIN;
-            lastVelocity.y = abs(lastVelocity.y);
+        if (newPosition.y < constraintAreaMinY) {
+            newPosition.y = constraintAreaMinY;
+            lastVelocity.y = -lastVelocity.y;
             bounced = true;
-        } else if (newPosition.y >= constraintAreaMaxY) {
-            newPosition.y = constraintAreaMaxY - MARGIN;
-            lastVelocity.y = -abs(lastVelocity.y);
-            bounced = true;
-        }
-        
-        if (newPosition.z <= minAltitude) {
-            newPosition.z = minAltitude + MARGIN;
-            lastVelocity.z = abs(lastVelocity.z);
-            bounced = true;
-        } else if (newPosition.z >= maxAltitude) {
-            newPosition.z = maxAltitude - MARGIN;
-            lastVelocity.z = -abs(lastVelocity.z);
+        } else if (newPosition.y > constraintAreaMaxY) {
+            newPosition.y = constraintAreaMaxY;
+            lastVelocity.y = -lastVelocity.y;
             bounced = true;
         }
         
-        // Add some randomness to direction (menos frequente se acabou de rebater)
-        if (!bounced && uniform(0, 1, 0) < 0.1) { // 10% chance of direction change
-            double angleXY = uniform(0, 2 * M_PI, 0);
-            double angleZ = uniform(-M_PI/6, M_PI/6, 0); // ±30 degrees vertical
-            double speed = lastVelocity.length();
-            lastVelocity.x = speed * cos(angleXY) * cos(angleZ);
-            lastVelocity.y = speed * sin(angleXY) * cos(angleZ);
-            lastVelocity.z = speed * sin(angleZ);
-        }
-        
-        if (bounced) {
-            EV << "ArbitraryMobility: UAV bounced at position (" << newPosition.x 
-               << ", " << newPosition.y << ", " << newPosition.z << ")" << endl;
+        if (newPosition.z < minAltitude) {
+            newPosition.z = minAltitude;
+            lastVelocity.z = -lastVelocity.z;
+            bounced = true;
+        } else if (newPosition.z > maxAltitude) {
+            newPosition.z = maxAltitude;
+            lastVelocity.z = -lastVelocity.z;
+            bounced = true;
         }
         
         lastPosition = newPosition;
+        
+        // Occasionally change direction randomly (every ~5-10 seconds on average)
+        if (!bounced && uniform(0, 1) < 0.05) { // 5% chance per update
+            double currentSpeed = sqrt(lastVelocity.x * lastVelocity.x + 
+                                      lastVelocity.y * lastVelocity.y + 
+                                      lastVelocity.z * lastVelocity.z);
+            
+            // Random new direction
+            double angleXY = uniform(0, 2 * M_PI);
+            double angleZ = uniform(-M_PI/6, M_PI/6); // ±30 degrees vertical
+            
+            lastVelocity.x = currentSpeed * cos(angleXY) * cos(angleZ);
+            lastVelocity.y = currentSpeed * sin(angleXY) * cos(angleZ);
+            lastVelocity.z = currentSpeed * sin(angleZ);
+            
+            EV << "ArbitraryMobility: Random direction change at t=" << now << endl;
+        }
+        
+        emitMobilityStateChangedSignal();
     }
     
     lastUpdate = now;
-    emitMobilityStateChangedSignal();
 }
 
 void ArbitraryMobility::orient()
 {
-    // Basic orientation - can be enhanced later
+    // Orientation not needed for this simulation
 }
 
 void ArbitraryMobility::handleSelfMessage(cMessage *message)
 {
     if (message == moveTimer) {
-        // Update position
+        // Update movement
         move();
         
         // Schedule next update
         double updateInterval = par("updateInterval");
         scheduleAt(simTime() + updateInterval, moveTimer);
-    }
-    else {
+    } else {
         MovingMobilityBase::handleSelfMessage(message);
     }
 }

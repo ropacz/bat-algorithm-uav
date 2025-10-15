@@ -31,8 +31,8 @@ echo "  2. Usar modo express (sem animação)"
 echo "  3. Usar o IDE ao invés do Qtenv"
 echo ""
 
-# Use first argument as config, default to SimpleObstacles
-CONFIG=${1:-SimpleObstacles}
+# Use first argument as config, default to QuickTest
+CONFIG=${1:-QuickTest}
 
 # Run with Qtenv (using RELEASE version to match INET)
 ../out/clang-release/src/bat-algorithm -u Qtenv -c $CONFIG \
