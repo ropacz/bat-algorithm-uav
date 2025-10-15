@@ -1,26 +1,28 @@
-# 🦇 Bat Algorithm for UAV Swarm - Obstacle Avoidance
+# 🦇 Bat Algorithm for UAV Swarm Routing
 
 [![OMNeT++](https://img.shields.io/badge/OMNeT%2B%2B-6.2.0-blue)](https://omnetpp.org/)
 [![INET](https://img.shields.io/badge/INET-4.5.4-green)](https://inet.omnetpp.org/)
 [![License](https://img.shields.io/badge/license-Academic-orange)](LICENSE)
 
-UAV swarm simulation using Bat Algorithm (bio-inspired metaheuristic) for navigation with static obstacle avoidance in OMNeT++ with INET Framework.
+UAV swarm simulation using Bat Algorithm (bio-inspired metaheuristic) for intelligent routing and communication in OMNeT++ with INET Framework.
 
 ## 📋 Overview
 
-This project implements the **Bat Algorithm** (Yang, 2010) for coordinating multiple UAV drones to:
-- ✈️ Navigate towards a target position
-- 🚧 Avoid static obstacles
-- 🤝 Maintain safe distance between drones
-- 📊 Optimize paths using bio-inspired swarm intelligence
+This project implements the **Bat Algorithm** (Yang, 2010) for optimizing routing between multiple UAV drones:
+- 📡 **Intelligent Routing**: Bio-inspired route discovery and optimization
+- � **Random Movement**: Autonomous 3D movement with boundary reflection
+- 🔄 **Multi-path Routing**: Discover and maintain multiple routes per destination
+- 📊 **Fitness-based Selection**: Routes evaluated by distance and quality
+- 🎯 **Communication Visualization**: Visual message passing in Qtenv GUI
 
 ### Key Features
 
-- **Bio-Inspired Navigation**: Mimics bat echolocation behavior
-- **Collision Avoidance**: Both static obstacles and inter-drone collision prevention
-- **Realistic Physics**: Velocity limits, smooth movements, boundary constraints
-- **Multiple Scenarios**: Pre-configured test cases
-- **Visualization**: Qtenv GUI support with event logging
+- **Bat Algorithm Routing**: Frequency, loudness, and pulse rate optimization
+- **Random Mobility**: Drones move autonomously with random direction changes
+- **Route Discovery (RREQ)**: Periodic broadcast to find neighboring drones
+- **Multiple Routes**: Redundant paths for reliability
+- **3D Simulation**: Full 3D movement with altitude control
+- **Visual Debugging**: Messages visible in Qtenv "Messages/Packet traffic" tab
 
 ## 🔧 Requirements
 
@@ -47,95 +49,88 @@ opp_env shell omnetpp-6.2.0 inet-4.5.4
 ### 1. Build the Project
 
 ```bash
-# Using make script
-./make.sh
+# Using make script (recommended)
+MODE=release ./make.sh
 
 # Or manually
-make MODE=release
+cd src && opp_makemake -f --deep && make MODE=release
 ```
 
 ### 2. Run Simulation
 
-**Command-line mode (Cmdenv):**
+**Command-line mode (Cmdenv - fastest):**
 ```bash
-./run_sim.sh QuickTest
+./run_sim.sh
 ```
 
-**GUI mode (Qtenv):**
+**GUI mode (Qtenv - visual):**
 ```bash
-./run_qtenv_fixed.sh
+./run_qtenv_fixed.sh          # Default: QuickTest (30s)
+./run_qtenv_fixed.sh Demo     # Quick demo (15s)
 ```
 
-### 3. Analyze Results
+### 3. View Results
 
-```bash
-python3 analyze_results.py
-```
-
-Results will be in `simulations/results/analysis/`
+- **Command-line**: Output shows route tables at end
+- **Qtenv GUI**: 
+  - See drones moving in 3D canvas
+  - Watch messages in "Messages / Packet traffic" tab
+  - View routing statistics in real-time
 
 ## 📊 Simulation Scenarios
 
 ### Available Configurations
 
-| Config | UAVs | Obstacles | Duration | Description |
-|--------|------|-----------|----------|-------------|
-| `General` | 3 | 1 | 300s | Default configuration |
-| `SimpleObstacles` | 3 | 1 | 300s | Simple obstacle avoidance |
-| `QuickTest` | 3 | 1 | 60s | Fast testing scenario |
-| `ManyObstacles` | 5 | 1 | 400s | More drones, longer simulation |
+| Config | UAVs | Duration | Description |
+|--------|------|----------|-------------|
+| `QuickTest` | 3 | 30s | Default - Fast testing scenario |
+| `Demo` | 3 | 15s | Quick demonstration |
+| `General` | 3 | 300s | Extended simulation |
+| `LargeNetwork` | 10 | 400s | Large swarm test |
 
 ### Running Specific Scenarios
 
 ```bash
-./run_sim.sh SimpleObstacles
-./run_sim.sh ManyObstacles
+./run_qtenv_fixed.sh Demo           # 15s quick demo
+./run_qtenv_fixed.sh QuickTest      # 30s default
+./run_qtenv_fixed.sh LargeNetwork   # 10 drones
 ```
 
-## 🧮 Bat Algorithm Implementation
+## 🧮 Bat Algorithm for Routing
 
-### Core Equations
+### Route Fitness Calculation
 
-**1. Frequency Update:**
-```
-f_i = f_min + (f_max - f_min) × β,  β ∈ [0,1]
-```
+Routes are evaluated using bat-inspired optimization:
 
-**2. Velocity Update:**
-```
-v_i(t+1) = v_i(t) × w + (x_best - x_i(t)) × f_i
-```
-- `w = 0.5` (inertia factor)
-- Prevents velocity accumulation
-
-**3. Position Update:**
-```
-x_i(t+1) = x_i(t) + v_i(t) × Δt
-```
-- `Δt` ensures smooth continuous movement
-
-**4. Loudness & Pulse Rate:**
-```
-A_i(t+1) = α × A_i(t)
-r_i(t+1) = r_i(0) × [1 - exp(-γ × t)]
+```cpp
+fitness = baseDistance × (1.0 + frequency × loudness × pulseRate)
 ```
 
-### Parameters
+Where:
+- **baseDistance**: Euclidean distance between nodes
+- **frequency**: Random value in [frequencyMin, frequencyMax]
+- **loudness**: Decreases over time (α = 0.9)
+- **pulseRate**: Increases over time (γ = 0.9)
+
+### Core Parameters
 
 ```ini
-# Bat Algorithm Core
-*.uav[*].batAlgorithm.frequencyMin = 0.0
-*.uav[*].batAlgorithm.frequencyMax = 2.0
-*.uav[*].batAlgorithm.loudness = 0.9
-*.uav[*].batAlgorithm.pulseRate = 0.5
-*.uav[*].batAlgorithm.alpha = 0.9       # Loudness reduction
-*.uav[*].batAlgorithm.gamma = 0.9       # Pulse rate increase
-*.uav[*].batAlgorithm.updateInterval = 1s
+# Bat Routing Algorithm
+*.uav[*].batRouting.routingUpdateInterval = 5s
+*.uav[*].batRouting.frequencyMin = 0.0
+*.uav[*].batRouting.frequencyMax = 2.0
+*.uav[*].batRouting.loudness = 0.9          # Initial loudness
+*.uav[*].batRouting.pulseRate = 0.5         # Initial pulse rate
+*.uav[*].batRouting.alpha = 0.9             # Loudness decay
+*.uav[*].batRouting.gamma = 0.9             # Pulse rate growth
 
-# Collision Avoidance
-*.uav[*].batAlgorithm.safetyDistance = 20m       # Obstacle margin
-*.uav[*].batAlgorithm.uavSafetyDistance = 50m    # Inter-drone distance (increased spacing)
-*.uav[*].batAlgorithm.obstacleWeight = 3.0       # Penalty multiplier
+# Random Mobility
+*.uav[*].mobility.minSpeed = 10mps
+*.uav[*].mobility.maxSpeed = 20mps
+*.uav[*].mobility.updateInterval = 0.1s     # Movement update frequency
+
+# Communication
+*.uav[*].batRouting.commRange = 300m        # Radio range
 ```
 
 ## 📁 Project Structure
@@ -143,60 +138,98 @@ r_i(t+1) = r_i(0) × [1 - exp(-γ × t)]
 ```
 bat-algorithm/
 ├── src/                          # Source code
-│   ├── BatAlgorithm.{cc,h,ned}  # Bat Algorithm implementation
-│   ├── ArbitraryMobility.{cc,h,ned} # Custom mobility model
-│   ├── Obstacle.{cc,h,ned}      # Obstacle module
+│   ├── BatRouting.{cc,h,ned}    # Bat Algorithm routing protocol
+│   ├── ArbitraryMobility.{cc,h,ned} # Random mobility model
 │   ├── UAV.ned                  # UAV compound module
 │   └── package.ned              # Package definition
 ├── simulations/                 # Simulation scenarios
 │   ├── omnetpp.ini              # Configuration file
-│   ├── BatSwarmNetworkWithObstacles.ned  # Network topology
-│   └── results/                 # Simulation outputs
-├── images/                      # Visual assets
+│   ├── BatSwarmNetwork.ned      # Network topology (3D canvas)
+│   ├── package.ned              # Package definition
+│   └── results/                 # Simulation outputs (.sca, .vec files)
 ├── BAT_ALGORITHM.md            # Algorithm documentation
 ├── analyze_results.py          # Results analysis script
 ├── run_sim.sh                  # Command-line runner
 ├── run_qtenv_fixed.sh          # GUI runner (macOS fixes)
+├── make.sh                     # Build script
 └── README.md                   # This file
 ```
 
 ## 🔬 Key Implementation Details
 
-### Bat Algorithm Module (`BatAlgorithm.cc`)
+### Bat Routing Module (`BatRouting.cc`)
 
-- **6-Phase Update Cycle**:
-  1. State Assessment
-  2. Velocity Update (with inertia)
-  3. Position Calculation
-  4. Solution Acceptance
-  5. Local Search
-  6. Communication & Scheduling
+**Route Discovery Process:**
+1. **Broadcast RREQ**: Periodically send route request to all neighbors
+2. **Receive & Process**: Update position cache, calculate fitness
+3. **Route Storage**: Maintain multiple routes per destination (sorted by fitness)
+4. **Route Selection**: Choose best route using bat-inspired fitness function
+
+**Message Types:**
+- `RouteDiscoveryPacket (kind=1)`: Broadcast to discover neighbors
+- `DataPacket (kind=2)`: Point-to-point data transmission
 
 ### Mobility Model (`ArbitraryMobility.cc`)
 
-- Smooth 3D movement with realistic physics
-- Boundary bounce with safety margins
-- Velocity-based position updates
+**Movement Features:**
+- **Random Initial Velocity**: Speed and direction randomized at start
+- **Periodic Updates**: Position updated every 0.1s based on velocity
+- **Boundary Reflection**: Drones bounce off area boundaries
+- **Random Direction Changes**: 5% chance per update to change direction
+- **Altitude Control**: Vertical movement limited to ±30°
 
-### Obstacle Module (`Obstacle.cc`)
+**3D Boundary Area:**
+- X: 0-500m
+- Y: 0-500m  
+- Z: 50-200m (altitude)
 
-- Static obstacles with configurable radius
-- Collision detection with safety margins
-- Distance-to-edge calculations
+### Communication System
+
+**Direct Message Passing:**
+- Uses `sendDirect()` to parent UAV module
+- Messages route through `radioIn` gate for visibility
+- Visible in Qtenv "Messages / Packet traffic" tab
+- Communication range: 300m
 
 ## 📈 Performance Metrics
 
 The simulation tracks:
 
-- **Fitness**: Distance to target + obstacle penalty
-- **Loudness**: Exploration parameter (decreases over time)
-- **Pulse Rate**: Exploitation parameter (increases over time)
-- **Position Broadcasts**: Inter-drone communication count
+- **Route Tables**: Number of routes discovered per destination
+- **Route Fitness**: Bio-inspired quality metric per route
+- **Message Count**: RREQ broadcasts and data packets sent
+- **Movement Statistics**: Position changes, velocity updates
+- **Simulation Events**: Total events processed during runtime
 
-Access via:
-- Statistics in `.sca` files
-- Vectors in `.vec` files
-- Analysis plots in `results/analysis/`
+**Example Output:**
+```
+INFO: BatRouting: Node 0 - Routes in table: 2
+INFO:   Destination 1: 2 routes
+INFO:   Destination 2: 3 routes
+```
+
+## 🎮 Usage Tips
+
+### Speeding Up Simulation in Qtenv
+
+1. **Express Mode**: Press `F6` (runs without animation)
+2. **Speed Control**: Menu → Simulate → Speed → Drag to "Fast"
+3. **Run Until**: Set target time to skip ahead
+4. **Use Demo Config**: Shortest duration (15s)
+
+### Debugging Routes
+
+**View route discovery in real-time:**
+```bash
+# Run with verbose logging
+cd simulations
+../src/bat-algorithm -u Cmdenv -c QuickTest --debug-on-errors=true
+```
+
+**Check routing table:**
+- Route info printed at end of simulation
+- Multiple routes = better redundancy
+- Higher fitness = shorter/better paths
 
 ## 🐛 Troubleshooting
 
@@ -210,17 +243,19 @@ opp_env shell omnetpp-6.2.0 inet-4.5.4
 
 **2. Qtenv crashes on macOS**
 ```bash
-# Use the fixed script:
+# Use the fixed script with environment setup:
 ./run_qtenv_fixed.sh
 
-# Or use command-line mode:
-./run_sim.sh QuickTest
+# Or try command-line mode instead:
+./run_sim.sh
 ```
 
 **3. Compilation errors**
 ```bash
 # Clean and rebuild:
+cd src
 make clean
+opp_makemake -f --deep
 make MODE=release
 ```
 
@@ -229,6 +264,32 @@ make MODE=release
 # Verify environment:
 echo $INET_PROJ
 # Should output: /path/to/inet-4.5.4
+
+# If not set, run:
+opp_env shell omnetpp-6.2.0 inet-4.5.4
+```
+
+**5. "No such config" error**
+```bash
+# Check available configs:
+cd simulations
+../src/bat-algorithm -u Cmdenv -q runnumbers
+
+# Use valid config names:
+./run_qtenv_fixed.sh QuickTest
+./run_qtenv_fixed.sh Demo
+```
+
+**6. Simulation runs too slow in Qtenv**
+```bash
+# Use Express mode (no animation):
+# In Qtenv GUI, press F6
+
+# Or use faster config:
+./run_qtenv_fixed.sh Demo  # Only 15 seconds
+
+# Or use command-line (fastest):
+./run_sim.sh
 ```
 
 ## 📚 Documentation
@@ -241,11 +302,27 @@ echo $INET_PROJ
 ## 🔍 Code Quality
 
 ✅ **Reviewed and validated:**
-- No memory leaks (proper pointer management)
-- No TODOs or FIXMEs
-- Consistent coding style
-- Comprehensive error handling
-- Well-documented code and parameters
+- No memory leaks (proper message cleanup)
+- Null pointer checks on all casts
+- Exception handling for edge cases
+- Consistent coding style (C++17)
+- Well-documented parameters
+- Visible message passing for debugging
+
+## 🎯 Current Features
+
+✅ **Implemented:**
+- Bat Algorithm routing with fitness calculation
+- Random 3D mobility with boundary reflection
+- Multi-path route discovery and maintenance
+- Visual message passing in Qtenv
+- Multiple simulation scenarios
+- Real-time routing statistics
+
+❌ **Not Included:**
+- Obstacle avoidance (removed for simplification)
+- Static navigation targets (focus on routing only)
+- Inter-drone collision avoidance (simplified mobility)
 
 ## 📄 License
 
@@ -255,13 +332,17 @@ See OMNeT++ and INET Framework licenses for details.
 
 ## 📖 References
 
-**Primary Source:**
-- Yang, X. S. (2010). "A new metaheuristic bat-inspired algorithm"
+**Primary Algorithm:**
+- Yang, X. S. (2010). "A new metaheuristic bat-inspired algorithm". *Nature Inspired Cooperative Strategies for Optimization (NICSO 2010)*, 65-74.
 
-**Related Work:**
-- Goerzen et al. (2015) - BA for UAV path planning
-- Gandhi et al. (2020) - BA with inertia factor
-- Zhang et al. (2018) - BA for multi-drone coordination
+**Routing Applications:**
+- Goerzen et al. (2015) - Bat Algorithm for UAV path planning
+- Zhang et al. (2018) - Bat Algorithm for multi-drone coordination
+- Gandhi et al. (2020) - Bat Algorithm with inertia factor
+
+**OMNeT++ Framework:**
+- Varga, A. (2001). "The OMNeT++ discrete event simulation system"
+- INET Framework documentation: https://inet.omnetpp.org/
 
 ## 👤 Author
 
@@ -271,11 +352,20 @@ See OMNeT++ and INET Framework licenses for details.
 
 ## 🙏 Acknowledgments
 
-- OMNeT++ Community
-- INET Framework developers
+- OMNeT++ Community for excellent simulation framework
+- INET Framework developers for networking protocols
 - Bio-inspired algorithms research community
+- Dr. Xin-She Yang for the Bat Algorithm
 
 ---
 
-**Last Updated:** October 2025  
+**Last Updated:** October 14, 2025  
+**Version:** 2.0 (Routing-focused)  
 **Status:** ✅ Production Ready
+
+**Quick Start Command:**
+```bash
+opp_env shell omnetpp-6.2.0 inet-4.5.4
+MODE=release ./make.sh
+./run_qtenv_fixed.sh Demo
+```
